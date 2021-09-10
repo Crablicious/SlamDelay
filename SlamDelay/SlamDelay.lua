@@ -111,10 +111,10 @@ function f:COMBAT_LOG_EVENT_UNFILTERED(event)
          else
             skip_next_attack = false
          end
-      elseif event == "SPELL_CAST_START" and spell_name == "Slam" then
+      elseif event == "SPELL_CAST_SUCCESS" and spell_name == "Slam" then
          if prev_melee_ts then
             -- Update current delay
-            local delay = timestamp - prev_melee_ts
+            local delay = timestamp - prev_melee_ts - 0.5
             currlabel:Update(delay)
 
             -- Update average delay

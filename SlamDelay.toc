@@ -1,0 +1,7 @@
+## Interface: 90002
+## Version: 1.0.0
+## Title: SlamDelay
+## Notes: Prints delay from auto to slam
+## Author: Gowahl
+
+SlamDelay.lua

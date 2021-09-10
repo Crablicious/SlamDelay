@@ -87,15 +87,29 @@ end
 function f:COMBAT_LOG_EVENT_UNFILTERED(event)
    local combat_info = {CombatLogGetCurrentEventInfo()}
    local timestamp, event, _, source_guid, _, _, _, dest_guid, _, _, _, _, spell_name, _ = unpack(combat_info)
+   local skip_next_attack = false
    -- make player guid local
    if source_guid == UnitGUID("player") then
-      if event == "SWING_DAMAGE" or event == "SWING_MISSED" then
+      if event == "SPELL_EXTRA_ATTACKS" then
+         skip_next_attack = true
+      elseif event == "SWING_DAMAGE" or event == "SWING_MISSED" then
          local _, _, _, _, _, _, _, _, _, is_offhand = select(12, unpack(combat_info))
          if not is_offhand then
-            print("Swing!: " .. timestamp)
+            if not skip_next_attack then
+               prev_melee_ts = timestamp
+               total_melee = total_melee + 1
+               slammeleelabel:Update()
+            else
+               skip_next_attack = false
+            end
+         end
+      elseif event == "SPELL_CAST_SUCCESS" and (spell_name == "Heroic Strike" or spell_name == "Cleave") then
+         if not skip_next_attack then
             prev_melee_ts = timestamp
             total_melee = total_melee + 1
             slammeleelabel:Update()
+         else
+            skip_next_attack = false
          end
       elseif event == "SPELL_CAST_START" and spell_name == "Slam" then
          if prev_melee_ts then

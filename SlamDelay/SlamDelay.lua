@@ -115,6 +115,12 @@ function f:COMBAT_LOG_EVENT_UNFILTERED(event)
          if prev_melee_ts then
             -- Update current delay
             local delay = timestamp - prev_melee_ts - 0.5
+            -- Max wasted delay is the speed of the mainhand weapon
+            -- Helps to not skew the average if you fail the first run up slam
+            local main_speed, _ = UnitAttackSpeed("player")
+            if delay > main_speed then
+               delay = main_speed
+            end
             currlabel:Update(delay)
 
             -- Update average delay

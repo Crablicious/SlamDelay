@@ -144,7 +144,8 @@ function f:COMBAT_LOG_EVENT_UNFILTERED(event)
             end
 
             -- Check for early slams
-            if delay > 3 then
+            local early_slam_threshold = main_speed * 0.8
+            if delay > early_slam_threshold then
                too_early_count = too_early_count + 1
                tooearlylabel:Update()
             end

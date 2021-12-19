@@ -34,6 +34,38 @@ local min_delay = nil
 local max_delay = 0
 local too_early_count = 0
 
+local slam_spell_ids = {
+   [1464]=true, -- Slam 1
+   [8820]=true, -- Slam 2
+   [11604]=true, -- Slam 3
+   [11605]=true, -- Slam 4
+   [25241]=true, -- Slam 5
+   [25242]=true, -- Slam 6
+}
+
+local heroic_strike_ids = {
+   [78]=true, -- Heroic Strike 1
+   [284]=true, -- Heroic Strike 2
+   [285]=true, -- Heroic Strike 3
+   [1608]=true, -- Heroic Strike 4
+   [11564]=true, -- Heroic Strike 5
+   [11565]=true, -- Heroic Strike 6
+   [11566]=true, -- Heroic Strike 7
+   [11567]=true, -- Heroic Strike 8
+   [25286]=true, -- Heroic Strike 9
+   [29707]=true, -- Heroic Strike 10
+   [30324]=true, -- Heroic Strike 11
+}
+
+local cleave_ids = {
+   [845]=true, -- Cleave 1
+   [7369]=true, -- Cleave 2
+   [11608]=true, -- Cleave 3
+   [11609]=true, -- Cleave 4
+   [20569]=true, -- Cleave 5
+   [25231]=true, -- Cleave 6
+}
+
 function avglabel:Update()
    if total_slams > 0 then
       local avg_delay = total_delay / total_slams
@@ -86,7 +118,7 @@ end
 
 function f:COMBAT_LOG_EVENT_UNFILTERED(event)
    local combat_info = {CombatLogGetCurrentEventInfo()}
-   local timestamp, event, _, source_guid, _, _, _, dest_guid, _, _, _, _, spell_name, _ = unpack(combat_info)
+   local timestamp, event, _, source_guid, _, _, _, dest_guid, _, _, _, spell_id, _, _ = unpack(combat_info)
    local skip_next_attack = false
    -- make player guid local
    if source_guid == UnitGUID("player") then
@@ -103,7 +135,7 @@ function f:COMBAT_LOG_EVENT_UNFILTERED(event)
                skip_next_attack = false
             end
          end
-      elseif event == "SPELL_CAST_SUCCESS" and (spell_name == "Heroic Strike" or spell_name == "Cleave") then
+      elseif event == "SPELL_CAST_SUCCESS" and (heroic_strike_ids[spell_id] or cleave_ids[spell_id]) then
          if not skip_next_attack then
             prev_melee_ts = timestamp
             total_melee = total_melee + 1
@@ -111,7 +143,7 @@ function f:COMBAT_LOG_EVENT_UNFILTERED(event)
          else
             skip_next_attack = false
          end
-      elseif event == "SPELL_CAST_SUCCESS" and spell_name == "Slam" then
+      elseif event == "SPELL_CAST_SUCCESS" and slam_spell_ids[spell_id] then
          if prev_melee_ts then
             -- Update current delay
             local delay = timestamp - prev_melee_ts - 0.5
